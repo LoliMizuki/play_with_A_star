@@ -14,6 +14,7 @@ class GameViewController: UIViewController {
         skView.presentScene(scene)
         skView.showsFPS = true
         skView.showsNodeCount = true
+        skView.showsDrawCount = true
         skView.ignoresSiblingOrder = true
     }
 

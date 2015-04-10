@@ -15,6 +15,7 @@
 		8E0838841AD39F6D0090C539 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E0838821AD39F6D0090C539 /* LaunchScreen.xib */; };
 		8E0838901AD39F6D0090C539 /* play_with_A_starTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E08388F1AD39F6D0090C539 /* play_with_A_starTests.swift */; };
 		8E08389A1AD3AD140090C539 /* TilesMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E0838991AD3AD130090C539 /* TilesMap.swift */; };
+		8E5E0D0A1AD7A78800F3F580 /* BreadthFirstSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5E0D091AD7A78800F3F580 /* BreadthFirstSearch.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,7 @@
 		8E08388E1AD39F6D0090C539 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E08388F1AD39F6D0090C539 /* play_with_A_starTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = play_with_A_starTests.swift; sourceTree = "<group>"; };
 		8E0838991AD3AD130090C539 /* TilesMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TilesMap.swift; sourceTree = "<group>"; };
+		8E5E0D091AD7A78800F3F580 /* BreadthFirstSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreadthFirstSearch.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +86,7 @@
 				8E0838751AD39F6D0090C539 /* AppDelegate.swift */,
 				8E0838791AD39F6D0090C539 /* GameScene.swift */,
 				8E0838991AD3AD130090C539 /* TilesMap.swift */,
+				8E5E0D091AD7A78800F3F580 /* BreadthFirstSearch.swift */,
 				8E08387B1AD39F6D0090C539 /* GameViewController.swift */,
 				8E08387D1AD39F6D0090C539 /* Main.storyboard */,
 				8E0838801AD39F6D0090C539 /* Images.xcassets */,
@@ -220,6 +223,7 @@
 			files = (
 				8E08387A1AD39F6D0090C539 /* GameScene.swift in Sources */,
 				8E08387C1AD39F6D0090C539 /* GameViewController.swift in Sources */,
+				8E5E0D0A1AD7A78800F3F580 /* BreadthFirstSearch.swift in Sources */,
 				8E08389A1AD3AD140090C539 /* TilesMap.swift in Sources */,
 				8E0838761AD39F6D0090C539 /* AppDelegate.swift in Sources */,
 			);
@@ -417,6 +421,7 @@
 				8E0838951AD39F6D0090C539 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8E0838961AD39F6D0090C539 /* Build configuration list for PBXNativeTarget "play_with_A_starTests" */ = {
 			isa = XCConfigurationList;
@@ -425,6 +430,7 @@
 				8E0838981AD39F6D0090C539 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
