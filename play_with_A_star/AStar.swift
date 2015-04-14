@@ -1,6 +1,6 @@
 import Foundation
 
-public class BreadthFirstSearch {
+public class AStar {
 
     public typealias ArrayIndex = (x: Int, y: Int)
 
@@ -21,7 +21,8 @@ public class BreadthFirstSearch {
         if map[from.y][from.x] == 1 { return nil }
         if map[to.y][to.x] == 1 { return nil }
 
-        _froniter.append(Node(location: from))
+        _fromNode = Node(location: from)
+        _froniter.append(_fromNode)
 
         return _findPath()
     }
@@ -30,9 +31,11 @@ public class BreadthFirstSearch {
 
     // MARK: Private
 
-    private var _visited = [Node]()
+    private var _cameFrom = [Node:Node]()
 
     private var _froniter = [Node]()
+
+    private var _fromNode: Node!
 
     private func _findPath() -> [ArrayIndex]? {
         while !_froniter.isEmpty {
@@ -40,13 +43,16 @@ public class BreadthFirstSearch {
             var current = _froniter.first!
 
             if current.isEqualLocation(x: to.x, y: to.y) {
-                return _generatePathToNode(current)
+                return _generatePath(from: _fromNode, to: current)
             }
 
             _froniter.removeAtIndex(0)
-            _visited.append(current)
 
             let neighbors = _allValidNeighborsWithNode(current, map: self.map)
+
+            for n in neighbors {
+                _cameFrom[n] = current
+            }
 
             _froniter += neighbors
         }
@@ -74,7 +80,7 @@ public class BreadthFirstSearch {
 
             let isNodeValid = {
                 [weak self] () -> Bool in
-                for visitedNode in self!._visited {
+                for visitedNode in self!._cameFrom.values {
                     if visitedNode.location.x == n.x && visitedNode.location.y == n.y { return false }
                 }
 
@@ -83,7 +89,7 @@ public class BreadthFirstSearch {
                 }
 
                 return true
-            }()
+                }()
 
             if isNodeValid {
                 neighbors.append(Node(location: (x: n.x, y: n.y), parent: node))
@@ -93,16 +99,14 @@ public class BreadthFirstSearch {
         return neighbors
     }
 
-    private func _generatePathToNode(node: Node) -> [ArrayIndex]? {
-        if node.parent == nil { return nil }
+    private func _generatePath(#from: Node, to: Node) -> [ArrayIndex]? {
+        var curr = to
 
-        var path = [ArrayIndex]()
+        var path = [curr.location]
 
-        var current: Node? = node
-
-        while current != nil {
-            path.append((x: current!.location.x, y: current!.location.y))
-            current = current!.parent
+        while curr != from {
+            curr = _cameFrom[curr]!
+            path.append(curr.location)
         }
 
         return path.reverse()
@@ -110,11 +114,11 @@ public class BreadthFirstSearch {
 
 
 
-    class Node: Equatable {
+    // MARK: Node
+
+    class Node: Equatable, Hashable {
 
         var location: ArrayIndex
-
-        var parent: Node? = nil
 
         var desc: String {
             return "(\(location.x), \(location.y))"
@@ -122,8 +126,9 @@ public class BreadthFirstSearch {
 
         init(location: ArrayIndex, parent: Node? = nil) {
             self.location = location
-            self.parent = parent
         }
+
+        var hashValue: Int { return location.x*10 + location.y }
 
         func isEqualLocation(#x: Int, y: Int) -> Bool {
             return location.x == x && location.y == y
@@ -132,15 +137,10 @@ public class BreadthFirstSearch {
         func isEqualLocation(another: Node) -> Bool {
             return location.x == another.location.x && location.y == another.location.y
         }
-
-        func isEqual(another: Node) -> Bool {
-            return
-                isEqualLocation(another) &&
-                ((parent == nil && another.parent == nil) || (parent!.isEqual(another.parent!)))
-        }
     }
 }
 
-func ==(lhs: BreadthFirstSearch.Node, rhs: BreadthFirstSearch.Node) -> Bool {
-    return lhs.isEqual(rhs)
+// can remove?
+func ==(lhs: AStar.Node, rhs: AStar.Node) -> Bool {
+    return lhs.isEqualLocation(rhs)
 }

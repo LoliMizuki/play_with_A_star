@@ -16,6 +16,8 @@
 		8E0838901AD39F6D0090C539 /* play_with_A_starTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E08388F1AD39F6D0090C539 /* play_with_A_starTests.swift */; };
 		8E08389A1AD3AD140090C539 /* TilesMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E0838991AD3AD130090C539 /* TilesMap.swift */; };
 		8E5E0D0A1AD7A78800F3F580 /* BreadthFirstSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5E0D091AD7A78800F3F580 /* BreadthFirstSearch.swift */; };
+		8E94EE411ADCCB9100B3D25C /* fairy-walk-down-001.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E94EE401ADCCB9100B3D25C /* fairy-walk-down-001.png */; };
+		8E94EE431ADCD83900B3D25C /* AStar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E94EE421ADCD83900B3D25C /* AStar.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +44,8 @@
 		8E08388F1AD39F6D0090C539 /* play_with_A_starTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = play_with_A_starTests.swift; sourceTree = "<group>"; };
 		8E0838991AD3AD130090C539 /* TilesMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TilesMap.swift; sourceTree = "<group>"; };
 		8E5E0D091AD7A78800F3F580 /* BreadthFirstSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreadthFirstSearch.swift; sourceTree = "<group>"; };
+		8E94EE401ADCCB9100B3D25C /* fairy-walk-down-001.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fairy-walk-down-001.png"; sourceTree = "<group>"; };
+		8E94EE421ADCD83900B3D25C /* AStar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AStar.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,10 +91,12 @@
 				8E0838791AD39F6D0090C539 /* GameScene.swift */,
 				8E0838991AD3AD130090C539 /* TilesMap.swift */,
 				8E5E0D091AD7A78800F3F580 /* BreadthFirstSearch.swift */,
+				8E94EE421ADCD83900B3D25C /* AStar.swift */,
 				8E08387B1AD39F6D0090C539 /* GameViewController.swift */,
 				8E08387D1AD39F6D0090C539 /* Main.storyboard */,
 				8E0838801AD39F6D0090C539 /* Images.xcassets */,
 				8E0838821AD39F6D0090C539 /* LaunchScreen.xib */,
+				8E94EE401ADCCB9100B3D25C /* fairy-walk-down-001.png */,
 				8E0838731AD39F6D0090C539 /* Supporting Files */,
 			);
 			path = play_with_A_star;
@@ -170,6 +176,7 @@
 				TargetAttributes = {
 					8E08386F1AD39F6D0090C539 = {
 						CreatedOnToolsVersion = 6.3;
+						DevelopmentTeam = T4SAZ6T5ZX;
 					};
 					8E0838881AD39F6D0090C539 = {
 						CreatedOnToolsVersion = 6.3;
@@ -201,6 +208,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E94EE411ADCCB9100B3D25C /* fairy-walk-down-001.png in Resources */,
 				8E0838841AD39F6D0090C539 /* LaunchScreen.xib in Resources */,
 				8E0838811AD39F6D0090C539 /* Images.xcassets in Resources */,
 				8E08387F1AD39F6D0090C539 /* Main.storyboard in Resources */,
@@ -224,6 +232,7 @@
 				8E08387A1AD39F6D0090C539 /* GameScene.swift in Sources */,
 				8E08387C1AD39F6D0090C539 /* GameViewController.swift in Sources */,
 				8E5E0D0A1AD7A78800F3F580 /* BreadthFirstSearch.swift in Sources */,
+				8E94EE431ADCD83900B3D25C /* AStar.swift in Sources */,
 				8E08389A1AD3AD140090C539 /* TilesMap.swift in Sources */,
 				8E0838761AD39F6D0090C539 /* AppDelegate.swift in Sources */,
 			);
@@ -352,9 +361,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = play_with_A_star/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -362,9 +374,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = play_with_A_star/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};
