@@ -4,22 +4,22 @@ public class AStar {
 
     public typealias ArrayIndex = (x: Int, y: Int)
 
-    public var map: [[Int]]
+    public var costMapData: [[Int]]
 
     public var from: ArrayIndex
 
     public var to: ArrayIndex
 
-    init(map: [[Int]], from: ArrayIndex, to: ArrayIndex) {
-        self.map = map
+    init(costMapData: [[Int]], from: ArrayIndex, to: ArrayIndex) {
+        self.costMapData = costMapData
         self.from = from
         self.to = to
     }
 
     public func path() -> [ArrayIndex]? {
-        if map.count == 0 || map[0].count == 0 { return nil }
-        if map[from.y][from.x] == 1 { return nil }
-        if map[to.y][to.x] == 1 { return nil }
+        if costMapData.count == 0 || costMapData[0].count == 0 { return nil }
+        if costMapData[from.y][from.x] == 1 { return nil }
+        if costMapData[to.y][to.x] == 1 { return nil }
 
         _fromNode = Node(location: from)
         _froniter.append(_fromNode)
@@ -48,7 +48,7 @@ public class AStar {
 
             _froniter.removeAtIndex(0)
 
-            let neighbors = _allValidNeighborsWithNode(current, map: self.map)
+            let neighbors = _allValidNeighborsWithNode(current, map: self.costMapData)
 
             for n in neighbors {
                 _cameFrom[n] = current
@@ -84,7 +84,7 @@ public class AStar {
                     if visitedNode.location.x == n.x && visitedNode.location.y == n.y { return false }
                 }
 
-                if map[n.y][n.x] == 1 {
+                if map[n.y][n.x] > 0 {
                     return false
                 }
 
@@ -92,7 +92,7 @@ public class AStar {
                 }()
 
             if isNodeValid {
-                neighbors.append(Node(location: (x: n.x, y: n.y), parent: node))
+                neighbors.append(Node(location: (x: n.x, y: n.y)))
             }
         }
 
@@ -120,15 +120,23 @@ public class AStar {
 
         var location: ArrayIndex
 
+        var id: Int = 0
+
+        var cost: Int = 0
+
+        var data = [String:AnyObject]()
+
         var desc: String {
             return "(\(location.x), \(location.y))"
         }
 
-        init(location: ArrayIndex, parent: Node? = nil) {
+        init(location: ArrayIndex) {
             self.location = location
         }
 
         var hashValue: Int { return location.x*10 + location.y }
+
+        var neighbors = [Node]()
 
         func isEqualLocation(#x: Int, y: Int) -> Bool {
             return location.x == x && location.y == y

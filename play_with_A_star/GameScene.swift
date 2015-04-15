@@ -6,11 +6,6 @@ class GameScene: SKScene {
 
     override func didMoveToView(view: SKView) {
         _createMap()
-
-//        _springTester = SKSpriteNode(imageNamed: "fairy-walk-down-001")
-//        self.addChild(_springTester)
-//
-//        _springTester.position = CGPoint(x: 100, y: 100)
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -18,7 +13,7 @@ class GameScene: SKScene {
         let p = touch.locationInNode(self)
 
         if let t = _tilesMap.tileFromPoint(p) {
-            t.property = t.property == Tile.Property.Path ? Tile.Property.Wall : Tile.Property.Path
+            t.cost = (t.cost + 1) % (_tilesMap.maxCost + 1)
         }
 
         _clearPathLines()
@@ -29,28 +24,6 @@ class GameScene: SKScene {
     }
    
     override func update(currentTime: CFTimeInterval) {
-//        if _preTime == nil {
-//            _preTime = currentTime
-//            return
-//        }
-//
-//        let timeStep = currentTime - _preTime!
-//        _preTime = currentTime
-//
-//        _springWithProgress(&_progress,
-//            velocity: &_velocity,
-//            targetProgress: 1,
-//            dampingRatio: 0.4,
-//            angularFrequency: CGFloat(M_PI),
-//            h: CGFloat(timeStep)
-//        )
-//
-//
-//        let tarPosX: CGFloat = self.size.width / 2
-//        let startPosX: CGFloat = 100.0
-//        let distance = tarPosX - startPosX
-//
-//        _springTester.position.x = startPosX + distance*_progress
     }
 
 
@@ -74,19 +47,19 @@ class GameScene: SKScene {
     private var _preTime: CFTimeInterval?
 
     private func _createMap() {
-        func randomTileProperty() -> Tile.Property { return Tile.Property.fromValue(arc4random_uniform(2)) }
+        func randomCost() -> Int { return Int(arc4random_uniform(3)) }
 
-        var mapData = Array<Array<Tile.Property>>()
+        var mapCostData = [[Int]]()
 
         for ih in Range(start: 0, end: tileSize.height) {
-            var colArray = Array<Tile.Property>()
+            var col = [Int]()
             for iw in Range(start: 0, end: tileSize.width) {
-                colArray.append(randomTileProperty())
+                col.append(randomCost())
             }
-            mapData.append(colArray)
+            mapCostData.append(col)
         }
 
-        _tilesMap = TilesMap(data: mapData, parent: self, parentSize: self.size)
+        _tilesMap = TilesMap(mapCostData: mapCostData, parent: self, parentSize: self.size)
     }
 
     private func _findBFSPath() -> [(x: Int, y: Int)]? {
@@ -95,11 +68,7 @@ class GameScene: SKScene {
         for tilesInRow in _tilesMap.tiles {
             var mapInRow = [Int]()
             for t in tilesInRow {
-                if t.property == Tile.Property.Path {
-                    mapInRow.append(0)
-                } else {
-                    mapInRow.append(1)
-                }
+                mapInRow.append(t.cost)
             }
 
             bfsMap.append(mapInRow)
@@ -108,7 +77,7 @@ class GameScene: SKScene {
 //        _bfs = BreadthFirstSearch(map: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
 //        return _bfs.path()
 
-        _astar = AStar(map: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
+        _astar = AStar(costMapData: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
         return _astar.path()
     }
 
@@ -132,33 +101,5 @@ class GameScene: SKScene {
         _pathNode!.lineWidth = 3
         self.addChild(_pathNode!)
         _pathNode!.position = CGPoint(x: 62.5/2, y: 62.5/2)
-    }
-
-
-    // test spring
-    // zeta - damping ratio     (input) 0 ~ 1
-    // omega - angular frequency (input) 0 ~ 2*PI ???
-    // h     - time step         (input)
-
-    private func _springWithProgress(inout progress: CGFloat,
-        inout velocity: CGFloat,
-        targetProgress: CGFloat,
-        dampingRatio: CGFloat,
-        angularFrequency: CGFloat,
-        h: CGFloat
-    ) {
-        let x = progress
-        let v = velocity
-        let xt = targetProgress
-
-        let f = 1.0 + 2.0 * h * dampingRatio * angularFrequency
-        let oo = angularFrequency * angularFrequency
-        let hoo = h * oo
-        let hhoo = h * hoo
-        let detInv = 1.0 / (f + hhoo)
-        let detX = f * x + h * v + hhoo * xt
-        let detV = v + hoo * (xt - x)
-        progress = detX * detInv
-        velocity = detV * detInv
     }
 }

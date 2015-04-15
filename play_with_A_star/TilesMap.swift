@@ -3,34 +3,44 @@ import SpriteKit
 
 public class TilesMap {
 
+    public let maxCost = 2
+
     public private(set) var tiles = [[Tile]]()
 
-    init?(
-        data: [[Tile.Property]],
+    public private(set) var parentNode: SKNode
+
+    init(
+        mapCostData: [[Int]],
         parent: SKNode,
         parentSize: CGSize,
-        pathColor: SKColor = SKColor.whiteColor(),
-        wallColor: SKColor = SKColor.grayColor(),
         suitForHeight: Bool = true
     ) {
-        if data.count == 0 { return nil }
+        parentNode = parent
 
-        Tile.pathColor = pathColor
-        Tile.wallColor = wallColor
+        _tileAtlas = SKTextureAtlas(named: "Tiles")
 
         _makeTilesInParnet(parent,
-            data: data,
-            size: parentSize.height/CGFloat(data.count + 1),
+            mapCostData: mapCostData,
+            size: parentSize.height/CGFloat(mapCostData.count + 1),
             center: CGPoint(x: parentSize.width/2, y: parentSize.height/2)
         )
     }
 
+    public func textureWithCost(cost: Int) -> SKTexture {
+        switch cost {
+        case 0: return _tileAtlas.textureNamed("Ground")
+        case 1: return _tileAtlas.textureNamed("Grass")
+        case 2: return _tileAtlas.textureNamed("Rock")
+        default: return _tileAtlas.textureNamed("Ground")
+        }
+    }
+
     public func print() {
-        var data = [[UInt32]]()
+        var data = [[Int]]()
 
         for tCol in tiles {
-            var col = [UInt32]()
-            for t in tCol { col.append(t.property.rawValue) }
+            var col = [Int]()
+            for t in tCol { col.append(t.cost) }
 
             data.append(col)
         }
@@ -51,49 +61,43 @@ public class TilesMap {
     }
 
 
+
     // MARK: Private
 
-    deinit {
-        // remove tile from parent
-    }
+    var _tileAtlas: SKTextureAtlas
 
     private func _makeTilesInParnet(
         parent: SKNode,
-        data: [[Tile.Property]],
+        mapCostData: [[Int]],
         size: CGFloat,
         center: CGPoint
     ) {
-        let mapWidth = data[0].count
-        let mapHeight = data.count
+        let mapWidth = mapCostData[0].count
+        let mapHeight = mapCostData.count
 
         let topLeftPosition = CGPoint(
             x: center.x - CGFloat(Int(mapWidth/2))*size,
             y: center.y + CGFloat(Int(mapHeight/2))*size
         )
 
-        func newTileNode() -> SKShapeNode {
-            return SKShapeNode(rect: CGRect(origin: CGPoint.zeroPoint, size: CGSize(width: size, height: size)))
-        }
-
         tiles.removeAll(keepCapacity: false)
 
-        for ih in 0..<data.count {
-
+        for ih in 0..<mapCostData.count {
             var tilesInCol = [Tile]()
 
-            for iw in 0..<data[ih].count {
-                let tileNode = newTileNode()
-                tileNode.lineWidth = 4
-                tileNode.strokeColor = SKColor.brownColor()
-                tileNode.position = CGPoint(
+            for iw in 0..<mapCostData[ih].count {
+                let tile = Tile(tilesMap: self, cost: mapCostData[ih][iw])
+
+                tile.tileNode!.position = CGPoint(
                     x: topLeftPosition.x + CGFloat(iw)*size,
                     y: topLeftPosition.y - CGFloat(ih)*size
                 )
 
-                parent.addChild(tileNode)
+                // set scale should go to another place ...
+                let scale = size / 32
+                tile.tileNode!.setScale(scale)
 
-                tilesInCol.append(Tile(tileNode: tileNode))
-                tilesInCol.last!.property = data[ih][iw]
+                tilesInCol.append(tile)
             }
 
             tiles.append(tilesInCol)
@@ -103,46 +107,24 @@ public class TilesMap {
 
 public class Tile {
 
-    public enum Property: UInt32 {
-        case Path = 0
-        case Wall = 1
-
-        public var desc: String {
-            switch (self.rawValue) {
-            case 0: return "Path"
-            case 1: return "Wall"
-            default: return "Unknow"
-            }
-        }
-
-        public static func fromValue(value: UInt32) -> Property {
-            switch (value) {
-            case 0: return .Path
-            case 1: return .Wall
-            default: return .Path
-            }
-        }
-    }
-
-    static var pathColor: SKColor = SKColor.whiteColor()
-
-    static var wallColor: SKColor = SKColor.grayColor()
-
     static var globalID: Int = 1
 
-    public weak var tileNode: SKShapeNode?
-
-    public var property : Property {
+    public var cost: Int {
         didSet {
-            tileNode?.fillColor = property == Property.Path ? Tile.pathColor : Tile.wallColor
+            tileNode?.texture = _tilesMap!.textureWithCost(cost)
         }
     }
+
+    public var tileNode: SKSpriteNode?
 
     public private(set) var id: Int
 
-    init(tileNode: SKShapeNode) {
-        self.tileNode = tileNode
-        self.property = Property.Path
+    init(tilesMap: TilesMap, cost: Int = 0) {
+        self._tilesMap = tilesMap
+        self.cost = cost
+
+        tileNode = SKSpriteNode(texture: _tilesMap!.textureWithCost(cost))
+        _tilesMap!.parentNode.addChild(tileNode!)
 
         self.id = Tile.globalID
         Tile.globalID++
@@ -150,5 +132,13 @@ public class Tile {
 
     public func containsPoint(point: CGPoint) -> Bool {
         return tileNode == nil ? false : tileNode!.containsPoint(point)
+    }
+
+
+
+    private var _tilesMap: TilesMap? = nil
+
+    deinit {
+        tileNode?.removeFromParent()
     }
 }
