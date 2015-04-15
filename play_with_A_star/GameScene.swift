@@ -5,22 +5,20 @@ class GameScene: SKScene {
     let tileSize: (width: UInt32, height: UInt32) = (10, 5)
 
     override func didMoveToView(view: SKView) {
+        _createLayers()
         _createMap()
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         let touch = touches.first as! UITouch
-        let p = touch.locationInNode(self)
+        let point = touch.locationInNode(_tileLayer)
 
-        if let t = _tilesMap.tileFromPoint(p) {
+        if let t = _tilesMap.tileFromPoint(point) {
             t.cost = (t.cost + 1) % (_tilesMap.maxCost + 1)
+
+            _clearPathLines()
+            _drawPath(_findPath())
         }
-
-        _clearPathLines()
-
-        let path = _findBFSPath()
-        if path == nil { return }
-        _drawPath(path!)
     }
    
     override func update(currentTime: CFTimeInterval) {
@@ -30,13 +28,15 @@ class GameScene: SKScene {
 
     // MARK: Private
 
+    private var _tileLayer: SKNode!
+
+    private var _pathDisplayLayer: SKNode!
+
     private var _tilesMap: TilesMap!
 
     private var _bfs: BreadthFirstSearch!
 
     private var _astar: AStar!
-
-    private var _pathNode: SKShapeNode?
 
     private var _springTester: SKSpriteNode!
 
@@ -45,6 +45,18 @@ class GameScene: SKScene {
     private var _velocity: CGFloat = 0
 
     private var _preTime: CFTimeInterval?
+
+    private func _createLayers() {
+        _tileLayer = SKNode()
+        _tileLayer.zPosition = 0
+        _tileLayer.position = CGPoint(x: self.size.width / 2, y: self.size.height / 2)
+        self.addChild(_tileLayer)
+
+        _pathDisplayLayer = SKNode()
+        _pathDisplayLayer.zPosition = 1
+        _pathDisplayLayer.position = _tileLayer.position
+        self.addChild(_pathDisplayLayer)
+    }
 
     private func _createMap() {
         func randomCost() -> Int { return Int(arc4random_uniform(3)) }
@@ -59,47 +71,50 @@ class GameScene: SKScene {
             mapCostData.append(col)
         }
 
-        _tilesMap = TilesMap(mapCostData: mapCostData, parent: self, parentSize: self.size)
+        _tilesMap = TilesMap(mapCostData: mapCostData, parent: _tileLayer, parentSize: self.size)
     }
 
-    private func _findBFSPath() -> [(x: Int, y: Int)]? {
-        var bfsMap = [[Int]]()
+    private func _findPath() -> [(x: Int, y: Int)]? {
+        var costMapData = [[Int]]()
 
         for tilesInRow in _tilesMap.tiles {
-            var mapInRow = [Int]()
+            var row = [Int]()
             for t in tilesInRow {
-                mapInRow.append(t.cost)
+                row.append(t.cost)
             }
 
-            bfsMap.append(mapInRow)
+            costMapData.append(row)
         }
+
+        let from = (x: 0, y: 0)
+        let to = (x: 9, y: 0)
 
 //        _bfs = BreadthFirstSearch(map: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
 //        return _bfs.path()
 
-        _astar = AStar(costMapData: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
+        _astar = AStar(costMapData: costMapData, from: from, to: to)
         return _astar.path()
     }
 
     private func _clearPathLines() {
-        if _pathNode != nil { _pathNode!.removeFromParent(); _pathNode = nil }
+        _pathDisplayLayer.removeAllChildren()
     }
 
-    private func _drawPath(path: [(x: Int, y: Int)]) {
-        _clearPathLines()
+    private func _drawPath(path: [(x: Int, y: Int)]?) {
+        if path == nil { return }
 
         var pathPoints = [CGPoint]()
-        for p in path {
+        for p in path! {
             pathPoints.append(_tilesMap.tiles[p.y][p.x].tileNode!.position)
         }
 
         let drawPath = CGPathCreateMutable()
         CGPathAddLines(drawPath, nil, pathPoints, pathPoints.count)
 
-        _pathNode = SKShapeNode(path: drawPath)
-        _pathNode!.strokeColor = SKColor.redColor()
-        _pathNode!.lineWidth = 3
-        self.addChild(_pathNode!)
-        _pathNode!.position = CGPoint(x: 62.5/2, y: 62.5/2)
+        var pathNode = SKShapeNode(path: drawPath)
+        pathNode.strokeColor = SKColor.redColor()
+        pathNode.lineWidth = 3
+
+        _pathDisplayLayer.addChild(pathNode)
     }
 }

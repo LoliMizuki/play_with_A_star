@@ -21,8 +21,7 @@ public class TilesMap {
 
         _makeTilesInParnet(parent,
             mapCostData: mapCostData,
-            size: parentSize.height/CGFloat(mapCostData.count + 1),
-            center: CGPoint(x: parentSize.width/2, y: parentSize.height/2)
+            tileSize: parentSize.height/CGFloat(mapCostData.count + 1)
         )
     }
 
@@ -69,15 +68,19 @@ public class TilesMap {
     private func _makeTilesInParnet(
         parent: SKNode,
         mapCostData: [[Int]],
-        size: CGFloat,
-        center: CGPoint
+        tileSize: CGFloat
     ) {
         let mapWidth = mapCostData[0].count
         let mapHeight = mapCostData.count
 
+        let topLeftMultiply = CGPoint(
+            x: CGFloat(Int(mapWidth/2)) - (mapWidth % 2 == 0 ? 0.5 : 0),
+            y: CGFloat(Int(mapHeight/2)) - (mapHeight % 2 == 0 ? 0.5 : 0)
+        )
+
         let topLeftPosition = CGPoint(
-            x: center.x - CGFloat(Int(mapWidth/2))*size,
-            y: center.y + CGFloat(Int(mapHeight/2))*size
+            x: -topLeftMultiply.x*tileSize,
+            y: topLeftMultiply.y*tileSize
         )
 
         tiles.removeAll(keepCapacity: false)
@@ -89,12 +92,12 @@ public class TilesMap {
                 let tile = Tile(tilesMap: self, cost: mapCostData[ih][iw])
 
                 tile.tileNode!.position = CGPoint(
-                    x: topLeftPosition.x + CGFloat(iw)*size,
-                    y: topLeftPosition.y - CGFloat(ih)*size
+                    x: topLeftPosition.x + CGFloat(iw)*tileSize,
+                    y: topLeftPosition.y - CGFloat(ih)*tileSize
                 )
 
                 // set scale should go to another place ...
-                let scale = size / 32
+                let scale = tileSize / 32
                 tile.tileNode!.setScale(scale)
 
                 tilesInCol.append(tile)
@@ -105,40 +108,43 @@ public class TilesMap {
     }
 }
 
-public class Tile {
+extension TilesMap {
 
-    static var globalID: Int = 1
+    public class Tile {
 
-    public var cost: Int {
-        didSet {
-            tileNode?.texture = _tilesMap!.textureWithCost(cost)
+        static var globalID: Int = 1
+
+        public var cost: Int {
+            didSet {
+                tileNode?.texture = _tilesMap!.textureWithCost(cost)
+            }
         }
-    }
 
-    public var tileNode: SKSpriteNode?
+        public var tileNode: SKSpriteNode?
 
-    public private(set) var id: Int
+        public private(set) var id: Int
 
-    init(tilesMap: TilesMap, cost: Int = 0) {
-        self._tilesMap = tilesMap
-        self.cost = cost
+        init(tilesMap: TilesMap, cost: Int = 0) {
+            self._tilesMap = tilesMap
+            self.cost = cost
 
-        tileNode = SKSpriteNode(texture: _tilesMap!.textureWithCost(cost))
-        _tilesMap!.parentNode.addChild(tileNode!)
+            tileNode = SKSpriteNode(texture: _tilesMap!.textureWithCost(cost))
+            _tilesMap!.parentNode.addChild(tileNode!)
 
-        self.id = Tile.globalID
-        Tile.globalID++
-    }
+            self.id = Tile.globalID
+            Tile.globalID++
+        }
 
-    public func containsPoint(point: CGPoint) -> Bool {
-        return tileNode == nil ? false : tileNode!.containsPoint(point)
-    }
-
-
-
-    private var _tilesMap: TilesMap? = nil
-
-    deinit {
-        tileNode?.removeFromParent()
+        public func containsPoint(point: CGPoint) -> Bool {
+            return tileNode == nil ? false : tileNode!.containsPoint(point)
+        }
+        
+        
+        
+        private var _tilesMap: TilesMap? = nil
+        
+        deinit {
+            tileNode?.removeFromParent()
+        }
     }
 }
