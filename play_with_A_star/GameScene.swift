@@ -2,7 +2,7 @@ import SpriteKit
 
 class GameScene: SKScene {
 
-    let tileSize: (width: UInt32, height: UInt32) = (10, 5)
+    let tileSize: (width: UInt32, height: UInt32) = (3, 3)
 
     override func didMoveToView(view: SKView) {
         _createLayers()
@@ -87,7 +87,7 @@ class GameScene: SKScene {
         }
 
         let from = (x: 0, y: 0)
-        let to = (x: 9, y: 0)
+        let to = (x: costMapData[0].count - 1, y: 0)
 
 //        _bfs = BreadthFirstSearch(map: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
 //        return _bfs.path()

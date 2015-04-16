@@ -22,7 +22,11 @@ public class AStar {
         if costMapData[to.y][to.x] == 1 { return nil }
 
         _fromNode = Node(location: from)
-        _froniter.append(_fromNode)
+        _fromNode.cost = 0
+        _fromNode.priority = 0
+        _froniter.push(_fromNode)
+
+        _costSoFar[_fromNode] = _fromNode.cost
 
         return _findPath()
     }
@@ -31,30 +35,37 @@ public class AStar {
 
     // MARK: Private
 
+    private var _froniter = PriorityQueue<Node>({ (n1, n2) in n1.priority < n2.priority })
+
     private var _cameFrom = [Node:Node]()
 
-    private var _froniter = [Node]()
+    private var _costSoFar = [Node:Int]()
 
     private var _fromNode: Node!
 
     private func _findPath() -> [ArrayIndex]? {
         while !_froniter.isEmpty {
 
-            var current = _froniter.first!
+            var current = _froniter.pop()!
 
             if current.isEqualLocation(x: to.x, y: to.y) {
                 return _generatePath(from: _fromNode, to: current)
             }
 
-            _froniter.removeAtIndex(0)
-
             let neighbors = _allValidNeighborsWithNode(current, map: self.costMapData)
 
-            for n in neighbors {
-                _cameFrom[n] = current
-            }
+            for next in neighbors {
+                let newCost = _costSoFar[current]! + next.cost
 
-            _froniter += neighbors
+                if _costSoFar[next] == nil || newCost < _costSoFar[next] {
+                    _costSoFar[next] = newCost
+
+                    next.priority = newCost
+                    _froniter.push(next)
+
+                    _cameFrom[next] = current
+                }
+            }
         }
 
         return nil
@@ -84,7 +95,7 @@ public class AStar {
                     if visitedNode.location.x == n.x && visitedNode.location.y == n.y { return false }
                 }
 
-                if map[n.y][n.x] > 0 {
+                if map[n.y][n.x] > 99 {
                     return false
                 }
 
@@ -92,7 +103,7 @@ public class AStar {
                 }()
 
             if isNodeValid {
-                neighbors.append(Node(location: (x: n.x, y: n.y)))
+                neighbors.append(Node(location: (x: n.x, y: n.y), cost: map[n.y][n.x]))
             }
         }
 
@@ -124,14 +135,17 @@ public class AStar {
 
         var cost: Int = 0
 
+        var priority: Int = 0
+
         var data = [String:AnyObject]()
 
         var desc: String {
             return "(\(location.x), \(location.y))"
         }
 
-        init(location: ArrayIndex) {
+        init(location: ArrayIndex, cost: Int = 0) {
             self.location = location
+            self.cost = cost
         }
 
         var hashValue: Int { return location.x*10 + location.y }
