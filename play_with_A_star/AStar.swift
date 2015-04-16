@@ -18,15 +18,13 @@ public class AStar {
 
     public func path() -> [ArrayIndex]? {
         if costMapData.count == 0 || costMapData[0].count == 0 { return nil }
-        if costMapData[from.y][from.x] == 1 { return nil }
-        if costMapData[to.y][to.x] == 1 { return nil }
 
         _fromNode = Node(location: from)
         _fromNode.cost = 0
         _fromNode.priority = 0
         _froniter.push(_fromNode)
 
-        _costSoFar[_fromNode] = _fromNode.cost
+        _costToNode[_fromNode] = _fromNode.cost
 
         return _findPath()
     }
@@ -39,7 +37,7 @@ public class AStar {
 
     private var _cameFrom = [Node:Node]()
 
-    private var _costSoFar = [Node:Int]()
+    private var _costToNode = [Node:Int]()
 
     private var _fromNode: Node!
 
@@ -55,10 +53,10 @@ public class AStar {
             let neighbors = _allValidNeighborsWithNode(current, map: self.costMapData)
 
             for next in neighbors {
-                let newCost = _costSoFar[current]! + next.cost
+                let newCost = _costToNode[current]! + next.cost
 
-                if _costSoFar[next] == nil || newCost < _costSoFar[next] {
-                    _costSoFar[next] = newCost
+                if _costToNode[next] == nil || newCost < _costToNode[next]! {
+                    _costToNode[next] = newCost
 
                     next.priority = newCost
                     _froniter.push(next)
@@ -131,8 +129,6 @@ public class AStar {
 
         var location: ArrayIndex
 
-        var id: Int = 0
-
         var cost: Int = 0
 
         var priority: Int = 0
@@ -162,7 +158,6 @@ public class AStar {
     }
 }
 
-// can remove?
 func ==(lhs: AStar.Node, rhs: AStar.Node) -> Bool {
     return lhs.isEqualLocation(rhs)
 }

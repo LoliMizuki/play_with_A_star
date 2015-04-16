@@ -7,6 +7,7 @@ class GameScene: SKScene {
     override func didMoveToView(view: SKView) {
         _createLayers()
         _createMap()
+//        _createMarks()
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -28,23 +29,29 @@ class GameScene: SKScene {
 
     // MARK: Private
 
+    // rende layers
+
     private var _tileLayer: SKNode!
+
+    private var _spritesLayer: SKNode!
 
     private var _pathDisplayLayer: SKNode!
 
+    // marks
+
+    private var _fromMarsk: SKSpriteNode!
+
+    private var _toMarsk: SKSpriteNode!
+
+    // map
+
     private var _tilesMap: TilesMap!
+
+    // path find algorithm
 
     private var _bfs: BreadthFirstSearch!
 
     private var _astar: AStar!
-
-    private var _springTester: SKSpriteNode!
-
-    private var _progress: CGFloat = 0
-
-    private var _velocity: CGFloat = 0
-
-    private var _preTime: CFTimeInterval?
 
     private func _createLayers() {
         _tileLayer = SKNode()
@@ -52,10 +59,22 @@ class GameScene: SKScene {
         _tileLayer.position = CGPoint(x: self.size.width / 2, y: self.size.height / 2)
         self.addChild(_tileLayer)
 
+        _spritesLayer = SKNode()
+        _spritesLayer.zPosition = 1
+        self.addChild(_spritesLayer)
+
         _pathDisplayLayer = SKNode()
-        _pathDisplayLayer.zPosition = 1
+        _pathDisplayLayer.zPosition = 2
         _pathDisplayLayer.position = _tileLayer.position
         self.addChild(_pathDisplayLayer)
+    }
+
+    private func _createMarks() {
+        _fromMarsk = SKSpriteNode(imageNamed: "fairy-walk-down-001")
+        _toMarsk = SKSpriteNode(imageNamed: "dest_flag")
+
+        _spritesLayer.addChild(_fromMarsk)
+        _spritesLayer.addChild(_toMarsk)
     }
 
     private func _createMap() {
