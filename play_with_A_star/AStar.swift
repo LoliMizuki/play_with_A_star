@@ -43,25 +43,23 @@ public class AStar {
 
     private func _findPath() -> [ArrayIndex]? {
         while !_froniter.isEmpty {
-
             var current = _froniter.pop()!
 
-            if current.isEqualLocation(x: to.x, y: to.y) {
-                return _generatePath(from: _fromNode, to: current)
-            }
+            let isReach = current.isEqualLocation(x: to.x, y: to.y)
+            if isReach { return _generatePath(from: _fromNode, to: current) }
 
-            let neighbors = _allValidNeighborsWithNode(current, map: self.costMapData)
+            let neighbors = _allValidNeighborsWithNode(current, map: costMapData)
 
-            for next in neighbors {
-                let newCost = _costToNode[current]! + next.cost
+            for neighbor in neighbors {
+                let costToNeighbor = _costToNode[current]! + neighbor.cost
 
-                if _costToNode[next] == nil || newCost < _costToNode[next]! {
-                    _costToNode[next] = newCost
+                if _costToNode[neighbor] == nil || costToNeighbor < _costToNode[neighbor]! {
+                    _costToNode[neighbor] = costToNeighbor
 
-                    next.priority = newCost
-                    _froniter.push(next)
+                    neighbor.priority = costToNeighbor
+                    _froniter.push(neighbor)
 
-                    _cameFrom[next] = current
+                    _cameFrom[neighbor] = current
                 }
             }
         }

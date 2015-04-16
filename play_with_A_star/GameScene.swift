@@ -2,7 +2,7 @@ import SpriteKit
 
 class GameScene: SKScene {
 
-    let tileSize: (width: UInt32, height: UInt32) = (3, 3)
+    let tileSize: (width: UInt32, height: UInt32) = (10, 10)
 
     override func didMoveToView(view: SKView) {
         _createLayers()
