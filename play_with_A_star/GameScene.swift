@@ -13,7 +13,7 @@ class GameScene: SKScene {
 
         _findAndDisplayPath()
     }
-    
+
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         let touch = touches.first as! UITouch
 
@@ -22,10 +22,25 @@ class GameScene: SKScene {
     }
 
     override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
+        if _currentPickupFlag == nil { return }
+
         let touch = touches.first as! UITouch
-        _currentPickupFlag?.position = touch.locationInNode(_spritesLayer)
+
+        if let tile = _nearestTileWithTouch(touch) {
+            let prePos = _currentPickupFlag!.position
+            _currentPickupFlag!.position = _tileLayer.convertPoint(tile.tileNode!.position, toNode: self)
+
+            if prePos != _currentPickupFlag!.position {
+                let pos: (x: Int, y: Int) = (x: tile.data["x"] as! Int, y: tile.data["y"] as! Int)
+
+                if _currentPickupFlag == _toFlag { _toPosition     = pos }
+                if _currentPickupFlag == _fromFlag { _fromPosition = pos }
+
+                _findAndDisplayPath()
+            }
+        }
     }
-   
+
     override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
         _currentPickupFlag = nil
     }
@@ -41,7 +56,7 @@ class GameScene: SKScene {
 
     private var _tileLayer: SKNode!
 
-    private var _spritesLayer: SKNode!
+    private var _flagsLayer: SKNode!
 
     private var _pathDisplayLayer: SKNode!
 
@@ -91,9 +106,9 @@ class GameScene: SKScene {
         _tileLayer.position = CGPoint(x: self.size.width / 2, y: self.size.height / 2)
         self.addChild(_tileLayer)
 
-        _spritesLayer = SKNode()
-        _spritesLayer.zPosition = 1
-        self.addChild(_spritesLayer)
+        _flagsLayer = SKNode()
+        _flagsLayer.zPosition = 1
+        self.addChild(_flagsLayer)
 
         _pathDisplayLayer = SKNode()
         _pathDisplayLayer.zPosition = 2
@@ -137,8 +152,8 @@ class GameScene: SKScene {
         setScale(_fromFlag)
         setScale(_toFlag)
 
-        _spritesLayer.addChild(_fromFlag)
-        _spritesLayer.addChild(_toFlag)
+        _flagsLayer.addChild(_fromFlag)
+        _flagsLayer.addChild(_toFlag)
     }
 
     private func _findAndDisplayPath() {
@@ -158,8 +173,8 @@ class GameScene: SKScene {
             costMapData.append(row)
         }
 
-//        _bfs = BreadthFirstSearch(map: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
-//        return _bfs.path()
+        //        _bfs = BreadthFirstSearch(map: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
+        //        return _bfs.path()
 
         _astar = AStar(costMapData: costMapData, from: _fromPosition, to: _toPosition)
         return _astar.path()
@@ -195,7 +210,7 @@ class GameScene: SKScene {
     // MARK: Control & Interactive
 
     private func _pickupFlagWithTouch(touch: UITouch) -> Bool {
-        let point = touch.locationInNode(_spritesLayer)
+        let point = touch.locationInNode(_flagsLayer)
 
         if _fromFlag.containsPoint(point) { _currentPickupFlag = _fromFlag; return true }
         if _toFlag.containsPoint(point)   { _currentPickupFlag = _toFlag;   return true }
@@ -205,10 +220,15 @@ class GameScene: SKScene {
 
     private func _tileMapWithTouch(touch: UITouch) {
         let point = touch.locationInNode(_tileLayer)
-
+        
         if let t = _tilesMap.tileFromPoint(point) {
             t.cost = (t.cost + 1) % (_tilesMap.maxCost + 1)
             _findAndDisplayPath()
         }
+    }
+    
+    private func _nearestTileWithTouch(touch: UITouch) -> TilesMap.Tile? {
+        let pos = touch.locationInNode(_tileLayer)
+        return _tilesMap.tileFromPoint(pos)
     }
 }

@@ -100,6 +100,9 @@ public class TilesMap {
             for iw in 0..<mapCostData[ih].count {
                 let tile = Tile(tilesMap: self, cost: mapCostData[ih][iw])
 
+                tile.data["x"] = iw
+                tile.data["y"] = ih
+
                 tile.tileNode!.position = CGPoint(
                     x: topLeftPosition.x + CGFloat(iw)*tileSize,
                     y: topLeftPosition.y - CGFloat(ih)*tileSize
@@ -130,6 +133,8 @@ extension TilesMap {
         }
 
         public var tileNode: SKSpriteNode?
+
+        public var data = [String:AnyObject]()
 
         public private(set) var id: Int
 
