@@ -59,6 +59,15 @@ public class TilesMap {
         return nil
     }
 
+    public func tileAt(#x: Int, y: Int) -> Tile? {
+        if y < 0 && y >= tiles.count { return nil }
+
+        let row = tiles[y]
+        if x < 0 && x >= row.count { return nil }
+
+        return tiles[y][x]
+    }
+
 
 
     // MARK: Private

@@ -7,29 +7,37 @@ class GameScene: SKScene {
     override func didMoveToView(view: SKView) {
         _createLayers()
         _createMap()
-//        _createMarks()
+        _createFlags()
+
+        _initSetting()
+
+        _findAndDisplayPath()
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         let touch = touches.first as! UITouch
-        let point = touch.locationInNode(_tileLayer)
 
-        if let t = _tilesMap.tileFromPoint(point) {
-            t.cost = (t.cost + 1) % (_tilesMap.maxCost + 1)
+        if _pickupFlagWithTouch(touch) { return }
+        _tileMapWithTouch(touch)
+    }
 
-            _clearPathLines()
-            _drawPath(_findPath())
-        }
+    override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
+        let touch = touches.first as! UITouch
+        _currentPickupFlag?.position = touch.locationInNode(_spritesLayer)
     }
    
-    override func update(currentTime: CFTimeInterval) {
+    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
+        _currentPickupFlag = nil
+    }
+
+    override func update(currentTime: NSTimeInterval) {
     }
 
 
 
     // MARK: Private
 
-    // rende layers
+    // Rende Layers
 
     private var _tileLayer: SKNode!
 
@@ -37,21 +45,45 @@ class GameScene: SKScene {
 
     private var _pathDisplayLayer: SKNode!
 
-    // marks
+    // Flags
 
-    private var _fromMarsk: SKSpriteNode!
+    private var _fromFlag: SKSpriteNode!
 
-    private var _toMarsk: SKSpriteNode!
+    private var _toFlag: SKSpriteNode!
 
-    // map
+    // Map
 
     private var _tilesMap: TilesMap!
 
-    // path find algorithm
+    // Path Find Algorithm
 
     private var _bfs: BreadthFirstSearch!
 
     private var _astar: AStar!
+
+    // States
+
+    private var _currentPickupFlag: SKSpriteNode? = nil
+
+    // functions
+
+    private var _fromPosition: (x: Int, y: Int)! {
+        didSet {
+            let p = _fromPosition
+            if let tile = _tilesMap.tileAt(x: p.x, y: p.y) {
+                _fromFlag.position = tile.tileNode!.parent!.convertPoint(tile.tileNode!.position, toNode: self)
+            }
+        }
+    }
+
+    private var _toPosition: (x: Int, y: Int)! {
+        didSet {
+            let p = _toPosition
+            if let tile = _tilesMap.tileAt(x: p.x, y: p.y) {
+                _toFlag.position = tile.tileNode!.parent!.convertPoint(tile.tileNode!.position, toNode: self)
+            }
+        }
+    }
 
     private func _createLayers() {
         _tileLayer = SKNode()
@@ -67,14 +99,6 @@ class GameScene: SKScene {
         _pathDisplayLayer.zPosition = 2
         _pathDisplayLayer.position = _tileLayer.position
         self.addChild(_pathDisplayLayer)
-    }
-
-    private func _createMarks() {
-        _fromMarsk = SKSpriteNode(imageNamed: "fairy-walk-down-001")
-        _toMarsk = SKSpriteNode(imageNamed: "dest_flag")
-
-        _spritesLayer.addChild(_fromMarsk)
-        _spritesLayer.addChild(_toMarsk)
     }
 
     private func _createMap() {
@@ -93,6 +117,35 @@ class GameScene: SKScene {
         _tilesMap = TilesMap(mapCostData: mapCostData, parent: _tileLayer, parentSize: self.size)
     }
 
+    private func _createFlags() {
+        let tileSize = _tilesMap.tiles[0][0].tileNode!.texture!.size()
+        let tileEdgeSize = max(tileSize.width, tileSize.height)
+
+        func findEdgeSizeInSprite(s: SKSpriteNode) -> CGFloat {
+            let size = s.texture!.size()
+            return max(size.width, size.height)
+        }
+
+        func setScale(s: SKSpriteNode) {
+            let size = findEdgeSizeInSprite(s)
+            s.setScale(tileEdgeSize/size)
+        }
+
+        _fromFlag = SKSpriteNode(imageNamed: "fairy-walk-down-001")
+        _toFlag = SKSpriteNode(imageNamed: "dest_flag")
+
+        setScale(_fromFlag)
+        setScale(_toFlag)
+
+        _spritesLayer.addChild(_fromFlag)
+        _spritesLayer.addChild(_toFlag)
+    }
+
+    private func _findAndDisplayPath() {
+        _clearPathLines()
+        _drawPath(_findPath())
+    }
+
     private func _findPath() -> [(x: Int, y: Int)]? {
         var costMapData = [[Int]]()
 
@@ -105,14 +158,16 @@ class GameScene: SKScene {
             costMapData.append(row)
         }
 
-        let from = (x: 0, y: 0)
-        let to = (x: costMapData[0].count - 1, y: 0)
-
 //        _bfs = BreadthFirstSearch(map: bfsMap, from: (x: 0, y: 0), to: (x: 9, y: 0))
 //        return _bfs.path()
 
-        _astar = AStar(costMapData: costMapData, from: from, to: to)
+        _astar = AStar(costMapData: costMapData, from: _fromPosition, to: _toPosition)
         return _astar.path()
+    }
+
+    private func _initSetting() {
+        _fromPosition = (x: 0, y: 0)
+        _toPosition = (x: self._tilesMap.tiles[0].count - 1, y: 0)
     }
 
     private func _clearPathLines() {
@@ -131,9 +186,29 @@ class GameScene: SKScene {
         CGPathAddLines(drawPath, nil, pathPoints, pathPoints.count)
 
         var pathNode = SKShapeNode(path: drawPath)
-        pathNode.strokeColor = SKColor.redColor()
+        pathNode.strokeColor = SKColor.purpleColor()
         pathNode.lineWidth = 3
 
         _pathDisplayLayer.addChild(pathNode)
+    }
+
+    // MARK: Control & Interactive
+
+    private func _pickupFlagWithTouch(touch: UITouch) -> Bool {
+        let point = touch.locationInNode(_spritesLayer)
+
+        if _fromFlag.containsPoint(point) { _currentPickupFlag = _fromFlag; return true }
+        if _toFlag.containsPoint(point)   { _currentPickupFlag = _toFlag;   return true }
+
+        return false
+    }
+
+    private func _tileMapWithTouch(touch: UITouch) {
+        let point = touch.locationInNode(_tileLayer)
+
+        if let t = _tilesMap.tileFromPoint(point) {
+            t.cost = (t.cost + 1) % (_tilesMap.maxCost + 1)
+            _findAndDisplayPath()
+        }
     }
 }
