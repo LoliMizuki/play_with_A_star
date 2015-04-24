@@ -1,3 +1,4 @@
+
 import Foundation
 
 public class AStar {
@@ -56,7 +57,11 @@ public class AStar {
                 if _costToNode[neighbor] == nil || costToNeighbor < _costToNode[neighbor]! {
                     _costToNode[neighbor] = costToNeighbor
 
-                    neighbor.priority = costToNeighbor
+//                    neighbor.priority = costToNeighbor // Dijkstra’s Algorithm
+//                    neighbor.priority = _heuristic(a: current.location,b:  neighbor.location) // Greedy Best-First Search
+                    neighbor.priority =
+                        costToNeighbor + Int(_heuristic(a: current.location,b:  neighbor.location)) // A*
+
                     _froniter.push(neighbor)
 
                     _cameFrom[neighbor] = current
@@ -117,6 +122,10 @@ public class AStar {
         }
 
         return path.reverse()
+    }
+
+    private func _heuristic(#a: ArrayIndex, b: ArrayIndex) -> Double {
+        return abs(Double(a.x - b.x)) + abs(Double(a.y - b.y))
     }
 
 

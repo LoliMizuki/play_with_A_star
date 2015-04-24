@@ -33,7 +33,7 @@ class GameScene: SKScene {
             if prePos != _currentPickupFlag!.position {
                 let pos: (x: Int, y: Int) = (x: tile.data["x"] as! Int, y: tile.data["y"] as! Int)
 
-                if _currentPickupFlag == _toFlag { _toPosition     = pos }
+                if _currentPickupFlag == _toFlag   { _toPosition   = pos }
                 if _currentPickupFlag == _fromFlag { _fromPosition = pos }
 
                 _findAndDisplayPath()
@@ -147,7 +147,7 @@ class GameScene: SKScene {
         }
 
         _fromFlag = SKSpriteNode(imageNamed: "fairy-walk-down-001")
-        _toFlag = SKSpriteNode(imageNamed: "dest_flag")
+        _toFlag   = SKSpriteNode(imageNamed: "dest_flag")
 
         setScale(_fromFlag)
         setScale(_toFlag)
